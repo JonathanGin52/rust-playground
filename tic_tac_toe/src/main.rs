@@ -1,4 +1,5 @@
 use std::io;
+use std::io::Write;
 use std::char;
 
 struct Player {
@@ -46,7 +47,7 @@ impl Player {
 }
 
 fn main() {
-    println!("Welcome to tic tac toe");
+    println!("Welcome to Tic Tac Toe!");
     let mut turn = 0;
     let mut player1 = Player {
         board: 0,
@@ -56,8 +57,9 @@ fn main() {
         board: 0,
         token: 'O',
     };
-    while turn <= 9 {
+    while turn < 9 {
         draw_board(&player1, &player2);
+        println!("{}'s turn.", if turn % 2 == 0 {player1.token} else {player2.token});
         let position = get_move(player1.board, player2.board);
         let game_over;
         if turn % 2 == 0 {
@@ -73,29 +75,30 @@ fn main() {
 }
 
 fn draw_board(player1: &Player, player2: &Player) {
-    let mut output = String::with_capacity(31);
+    let mut output = String::with_capacity(54);
     for n in 0..=8 {
         if n != 0 && n % 3 == 0 {
-            output += "\n- - - \n";
+            output += "\n -   -   -\n";
         }
         let token = if check_bit(player1.board, n) {
             player1.token
         } else if check_bit(player2.board, n) {
             player2.token
         } else {
-            char::from_digit((n + 1) as u32, 10).unwrap_or(' ')
+            char::from_digit((n + 1) as u32, 10).unwrap()
         };
-        output.push(token);
+        output += &format!(" {}", token);
         if (n + 1) % 3 != 0 {
-            output.push('|');
+            output += " |";
         }
     }
-    println!("{}\n", output);
+    println!("\n{}\n", output);
 }
 
 fn get_move(board1: u16, board2: u16) -> u8 {
     loop {
-        println!("Please input a position from 1-9.");
+        print!("Please input a position from 1-9: ");
+        io::stdout().flush().unwrap();
 
         let mut input = String::new();
 
