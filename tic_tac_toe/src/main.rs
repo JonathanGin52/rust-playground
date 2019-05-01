@@ -14,27 +14,17 @@ impl Player {
     }
 
     fn check_win(&self) -> bool {
-        self.check_horizontal_win() || self.check_vertical_win() || self.check_diagonal_win()
+        let horizontal_mask = 0b0111;
+        let vertical_mask = 0b0100_1001;
+        self.check_diagonal_win() || self.check_orthagonal_win(horizontal_mask, 3) || self.check_orthagonal_win(vertical_mask, 1)
     }
 
-    fn check_horizontal_win(&self) -> bool {
-        let mut mask = 0b0111;
+    fn check_orthagonal_win(&self, mut mask: u16, bit_shift: u8) -> bool {
         for _ in 0..3 {
             if mask & self.board == mask {
                 return true;
             }
-            mask <<= 3;
-        }
-        false
-    }
-
-    fn check_vertical_win(&self) -> bool {
-        let mut mask = 0b0100_1001;
-        for _ in 0..3 {
-            if mask & self.board == mask {
-                return true;
-            }
-            mask <<= 1;
+            mask <<= bit_shift;
         }
         false
     }
@@ -107,7 +97,7 @@ fn get_move(board1: u16, board2: u16) -> u8 {
 
         match input.trim().parse() {
             Ok(num) => {
-                if !(check_bit(board1, num - 1) || check_bit(board2, num - 1)) {
+                if num >= 1 && num <= 9 && !(check_bit(board1, num - 1) || check_bit(board2, num - 1)) {
                     return num;
                 }
             },
