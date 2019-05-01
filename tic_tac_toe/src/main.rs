@@ -20,14 +20,14 @@ impl Player {
         ];
         for &mask in &win_masks {
             if mask & self.board == mask {
-                return true
+                return true;
             }
         }
         false
     }
 
-    fn place_token(&mut self, position: u32) -> bool {
-        self.board += 2u16.pow(position - 1);
+    fn place_token(&mut self, position: u8) -> bool {
+        self.board += 2u16.pow((position - 1) as u32);
         self.check_win()
     }
 }
@@ -80,7 +80,7 @@ fn draw_board(player1: &Player, player2: &Player) {
     println!("{}", output);
 }
 
-fn get_move(board1: u16, board2: u16) -> u32 {
+fn get_move(board1: u16, board2: u16) -> u8 {
     loop {
         println!("Please input a position from 1-9.");
 
@@ -89,14 +89,18 @@ fn get_move(board1: u16, board2: u16) -> u32 {
         io::stdin().read_line(&mut input)
             .expect("Failed to read line");
 
-        let input: u32 = match input.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue
+        match input.trim().parse() {
+            Ok(num) => {
+                if !(check_bit(board1, num - 1) || check_bit(board2, num - 1)) {
+                    return num;
+                }
+            },
+            Err(_) => continue,
         };
-        return input;
     }
 }
 
+// Returns true if the specified bit is 1
 fn check_bit(input: u16, n: u8) -> bool {
     input & (1 << n) != 0
 }
