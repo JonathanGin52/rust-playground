@@ -7,28 +7,41 @@ struct Player {
 }
 
 impl Player {
+    fn place_token(&mut self, position: u8) -> bool {
+        self.board += 2u16.pow((position - 1) as u32);
+        self.check_win()
+    }
+
     fn check_win(&self) -> bool {
-        let win_masks = [
-            0b0_0000_0111,
-            0b0_0011_1000,
-            0b1_1100_0000,
-            0b0_0100_1001,
-            0b0_1001_0010,
-            0b1_0010_0100,
-            0b1_0001_0001,
-            0b0_0101_0100,
-        ];
-        for &mask in &win_masks {
+        self.check_horizontal_win() || self.check_vertical_win() || self.check_diagonal_win()
+    }
+
+    fn check_horizontal_win(&self) -> bool {
+        let mut mask = 0b0111;
+        for _ in 0..3 {
             if mask & self.board == mask {
                 return true;
             }
+            mask <<= 3;
         }
         false
     }
 
-    fn place_token(&mut self, position: u8) -> bool {
-        self.board += 2u16.pow((position - 1) as u32);
-        self.check_win()
+    fn check_vertical_win(&self) -> bool {
+        let mut mask = 0b0100_1001;
+        for _ in 0..3 {
+            if mask & self.board == mask {
+                return true;
+            }
+            mask <<= 1;
+        }
+        false
+    }
+
+    fn check_diagonal_win(&self) -> bool {
+        let left_diagonal_mask = 0b1_0001_0001;
+        let right_diagonal_mask = 0b0101_0100;
+        self.board & left_diagonal_mask == left_diagonal_mask || self.board & right_diagonal_mask == right_diagonal_mask 
     }
 }
 
@@ -77,7 +90,7 @@ fn draw_board(player1: &Player, player2: &Player) {
             output.push('|');
         }
     }
-    println!("{}", output);
+    println!("{}\n", output);
 }
 
 fn get_move(board1: u16, board2: u16) -> u8 {
